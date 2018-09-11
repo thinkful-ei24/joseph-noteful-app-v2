@@ -79,7 +79,6 @@ router.put('/:id', (req, res, next) => {
     .update(updateObj)
     .returning('*')
     .then(results => {
-      console.log(results)
       if (!results[0]){
         next();  
       } else {       
@@ -125,7 +124,7 @@ router.delete('/:id', (req, res, next) => {
   knex('notes')
     .where('id', id)
     .del()
-    .then(result => {
+    .then( () => {
       res.sendStatus(204);
     })
     .catch(err => {
