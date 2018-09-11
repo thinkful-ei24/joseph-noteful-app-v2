@@ -40,7 +40,7 @@ router.get('/:id', (req, res, next) => {
   knex
     .select()
     .from('notes')
-    .where({id: Number(id)})
+    .where({id: id})
     .then(results => {
       if (!results[0]){
         next();  
