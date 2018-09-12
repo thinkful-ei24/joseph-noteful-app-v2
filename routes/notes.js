@@ -67,11 +67,15 @@ router.put('/:id', (req, res, next) => {
 
   /***** Never trust users - validate input *****/
   const updateObj = {};
-  const updateableFields = ['title', 'content'];
-
+  const updateableFields = ['title', 'content', 'folder_id'];
+  const body = req.body;
+  if (body['folderId']){
+    body['folder_id'] = body['folderId'];
+    delete body['folderId'];
+  }
   updateableFields.forEach(field => {
-    if (field in req.body) {
-      updateObj[field] = req.body[field];
+    if (field in body) { 
+      updateObj[field] = body[field] ;
     }
   });
 
@@ -82,16 +86,21 @@ router.put('/:id', (req, res, next) => {
     return next(err);
   }
 
+  let noteId;
+
   knex('notes')
     .where('id', id)
-    .update(updateObj)
-    .returning('*')
-    .then(results => {
-      if (!results[0]){
-        next();  
-      } else {       
-        res.json(results[0]);
-      }
+    .update(updateObj) //, 'title', 'content', 'folderId'
+    .returning('id')
+    .then(([id]) => {
+      noteId = id;
+      return knex.select('notes.id', 'title', 'content', 'folder_id as folderId')
+        .from('notes')
+        .leftJoin('folders', 'notes.folder_id', 'folders.id')
+        .where('notes.id', noteId);
+    })
+    .then(([result]) => {
+      res.json(result);
     })
     .catch(err => {
       next(err);
@@ -100,9 +109,15 @@ router.put('/:id', (req, res, next) => {
 
 // Post (insert) an item
 router.post('/', (req, res, next) => {
-  const { title, content } = req.body;
+  const { title, content, folderId } = req.body;
 
-  const newItem = { title, content };
+  const newItem = {
+    title:  title,
+    content: content,
+    folder_id: folderId 
+  };
+
+  let noteId;
   /***** Never trust users - validate input *****/
   if (!newItem.title) {
     const err = new Error('Missing `title` in request body');
@@ -112,13 +127,16 @@ router.post('/', (req, res, next) => {
 
   knex('notes')
     .insert(newItem)
-    .returning('*')
-    . then(results => {
-      if (!results[0]){
-        res.sendStatus(500);  
-      } else {
-        res.location(`http://${req.headers.host}/notes/${results[0].id}`).status(201).json(results[0]);
-      }
+    .returning('id')
+    .then(([id]) => {
+      noteId = id;
+      return knex.select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName')
+        .from('notes')
+        .leftJoin('folders', 'notes.folder_id', 'folders.id')
+        .where('notes.id', noteId);
+    })
+    .then(([result]) => {
+      res.location(`http://${req.headers.host}/notes/${result.id}`).status(201).json(result);
     })
     .catch(err => {
       next(err);
