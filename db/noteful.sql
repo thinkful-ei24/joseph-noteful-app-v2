@@ -6,6 +6,8 @@ CREATE TABLE folders (
   name text NOT NULL
 );
 
+ALTER SEQUENCE folders_id_seq RESTART WITH 100;
+
 CREATE TABLE notes (
   id SERIAL PRIMARY KEY,
   title text NOT NULL,
@@ -43,8 +45,12 @@ INSERT INTO notes (title, content) VALUES
   ( 'Why you should forget everything you learned about cats',
    'intial content lorem ipsum');
 
-
-
+INSERT INTO notes (title, content, folder_id) VALUES
+  (
+    '5 life lessons learned from cats',
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...',
+    100
+  );
 
 
 
