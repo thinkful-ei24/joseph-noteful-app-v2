@@ -35,10 +35,10 @@ CREATE TABLE notes_tags (
 );
 
 INSERT INTO folders (id,name) VALUES
-  (100,'Archive'),
-  (101,'Drafts'),
-  (102,'Personal'),
-  (103,'Work');
+  (1,'Archive'),
+  (2,'Drafts'),
+  (3,'Personal'),
+  (4,'Work');
 
 
 INSERT INTO notes (id, title, content) VALUES 

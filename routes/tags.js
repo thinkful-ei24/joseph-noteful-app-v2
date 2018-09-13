@@ -39,7 +39,7 @@ router.put('/:id', (req, res, next) => {
   knex('tags')
     .where('id', id)
     .update(updateObj)
-    .returning('id','name')
+    .returning('*')
     .then(([results]) => {
       res.json(results);
     })
