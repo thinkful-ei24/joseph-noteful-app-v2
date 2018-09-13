@@ -41,35 +41,28 @@ INSERT INTO folders (id,name) VALUES
   (4,'Work');
 
 
-INSERT INTO notes (id, title, content) VALUES 
-  (1,'5 life lessons learned from cats',
+INSERT INTO notes (id,folder_id, title, content) VALUES 
+  (1,1,'5 life lessons learned from cats',
    'intial content lorem ipsum'),
-  (2,'What the government doesnt want you to know about cats',
+  (2,1,'What the government doesnt want you to know about cats',
    'intial content lorem ipsum'), 
-  (3,'The most boring article about cats youll ever read',
+  (3,1,'The most boring article about cats youll ever read',
    'intial content lorem ipsum'), 
-  (4,'7 things lady gaga has in common with cats',
+  (4,2,'7 things lady gaga has in common with cats',
    'intial content lorem ipsum'), 
-  (5,'The most incredible article about cats youll ever read',
+  (5,3,'The most incredible article about cats youll ever read',
    'intial content lorem ipsum'), 
-  (6,'10 ways cats can help you live to 100',
+  (6,2,'10 ways cats can help you live to 100',
    'intial content lorem ipsum'), 
-  (7,'9 reasons you can blame the recession on cats',
+  (7,2,'9 reasons you can blame the recession on cats',
    'intial content lorem ipsum'), 
-  (8,'10 ways marketers are making you addicted to cats',
+  (8,null,'10 ways marketers are making you addicted to cats',
    'intial content lorem ipsum'), 
-  (9, '11 ways investing in cats can make you a millionaire',
+  (9,null, '11 ways investing in cats can make you a millionaire',
    'intial content lorem ipsum'), 
-  ( 10,'Why you should forget everything you learned about cats',
+  ( 10,null,'Why you should forget everything you learned about cats',
    'intial content lorem ipsum');
 
-INSERT INTO notes (id, title, content, folder_id) VALUES
-  (
-    11,
-    'note added with a folder',
-    'Lorem ipsum dolor sit amet...',
-    100
-  );
 
 INSERT INTO tags (id, name) VALUES
   (1,'stuff'),

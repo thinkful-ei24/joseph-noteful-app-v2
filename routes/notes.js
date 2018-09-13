@@ -69,7 +69,7 @@ router.get('/:id', (req, res, next) => {
         next();  
       } else {
         const hydrated = hydrateNotes(results);
-        res.json(hydrated);
+        res.json(hydrated[0]);
       } 
     })
     .catch(err => {
