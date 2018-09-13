@@ -1,5 +1,9 @@
+-- psql -U dev -d noteful-app -f ./db/noteful.sql
+
 DROP TABLE IF EXISTS notes;
 DROP TABLE IF EXISTS folders;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS notes_tags;
 
 CREATE TABLE folders (
   id serial PRIMARY KEY,
@@ -16,42 +20,61 @@ CREATE TABLE notes (
   folder_id int REFERENCES folders(id) ON DELETE SET NULL
 );
 
-INSERT INTO folders (name) VALUES
-  ('Archive'),
-  ('Drafts'),
-  ('Personal'),
-  ('Work');
+CREATE TABLE tags (
+  id SERIAL PRIMARY KEY,
+  name text NOT NULL
+);
+
+CREATE TABLE notes_tags (
+  note_id INTEGER NOT NULL REFERENCES notes ON DELETE CASCADE,
+  tag_id INTEGER NOT NULL REFERENCES tags ON DELETE CASCADE
+);
+
+INSERT INTO folders (id,name) VALUES
+  (100,'Archive'),
+  (101,'Drafts'),
+  (102,'Personal'),
+  (103,'Work');
 
 
-INSERT INTO notes (title, content) VALUES 
-  ('5 life lessons learned from cats',
+INSERT INTO notes (id, title, content) VALUES 
+  (1,'5 life lessons learned from cats',
    'intial content lorem ipsum'),
-  ('What the government doesnt want you to know about cats',
+  (2,'What the government doesnt want you to know about cats',
    'intial content lorem ipsum'), 
-  ('The most boring article about cats youll ever read',
+  (3,'The most boring article about cats youll ever read',
    'intial content lorem ipsum'), 
-  ('7 things lady gaga has in common with cats',
+  (4,'7 things lady gaga has in common with cats',
    'intial content lorem ipsum'), 
-  ('The most incredible article about cats youll ever read',
+  (5,'The most incredible article about cats youll ever read',
    'intial content lorem ipsum'), 
-  ('10 ways cats can help you live to 100',
+  (6,'10 ways cats can help you live to 100',
    'intial content lorem ipsum'), 
-  ('9 reasons you can blame the recession on cats',
+  (7,'9 reasons you can blame the recession on cats',
    'intial content lorem ipsum'), 
-  ('10 ways marketers are making you addicted to cats',
+  (8,'10 ways marketers are making you addicted to cats',
    'intial content lorem ipsum'), 
-  ( '11 ways investing in cats can make you a millionaire',
+  (9, '11 ways investing in cats can make you a millionaire',
    'intial content lorem ipsum'), 
-  ( 'Why you should forget everything you learned about cats',
+  ( 10,'Why you should forget everything you learned about cats',
    'intial content lorem ipsum');
 
-INSERT INTO notes (title, content, folder_id) VALUES
+INSERT INTO notes (id, title, content, folder_id) VALUES
   (
-    '5 life lessons learned from cats',
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor...',
+    11,
+    'note added with a folder',
+    'Lorem ipsum dolor sit amet...',
     100
   );
 
+INSERT INTO tags (id, name) VALUES
+  (1,'stuff'),
+  (2, 'yay'),
+  (3, 'cats');
 
+INSERT INTO notes_tags (note_id, tag_id) VALUES
+  (1,1),
+  (1,2),
+  (2,3);
 
 

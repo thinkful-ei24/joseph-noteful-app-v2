@@ -64,28 +64,21 @@ router.get('/:id', (req, res, next) => {
 // Put update an item
 router.put('/:id', (req, res, next) => {
   const id = req.params.id;
+  const {title, content, folderId} = req.body;
 
-  /***** Never trust users - validate input *****/
-  const updateObj = {};
-  const updateableFields = ['title', 'content', 'folder_id'];
-  const body = req.body;
-  if (body['folderId']){
-    body['folder_id'] = body['folderId'];
-    delete body['folderId'];
-  }
-  updateableFields.forEach(field => {
-    if (field in body) { 
-      updateObj[field] = body[field] ;
-    }
-  });
-
-  /***** Never trust users - validate input *****/
-  if (!updateObj.title) {
+  if (!title) {
     const err = new Error('Missing `title` in request body');
     err.status = 400;
     return next(err);
   }
+  /***** Never trust users - validate input *****/
+  const updateObj = {
+    title: title,
+    content: content,
+    folder_id: (folderId) ? folderId : null
+  };
 
+  /***** Never trust users - validate input *****/
   let noteId;
 
   knex('notes')
