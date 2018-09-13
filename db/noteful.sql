@@ -1,9 +1,10 @@
 -- psql -U dev -d noteful-app -f ./db/noteful.sql
 
+DROP TABLE IF EXISTS tags CASCADE;
+DROP TABLE IF EXISTS notes_tags CASCADE;
 DROP TABLE IF EXISTS notes;
 DROP TABLE IF EXISTS folders;
-DROP TABLE IF EXISTS tags;
-DROP TABLE IF EXISTS notes_tags;
+
 
 CREATE TABLE folders (
   id serial PRIMARY KEY,
@@ -24,6 +25,7 @@ CREATE TABLE tags (
   id SERIAL PRIMARY KEY,
   name text NOT NULL
 );
+ALTER SEQUENCE tags_id_seq RESTART WITH 100;
 
 CREATE TABLE notes_tags (
   note_id INTEGER NOT NULL REFERENCES notes ON DELETE CASCADE,
