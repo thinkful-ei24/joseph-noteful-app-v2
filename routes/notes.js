@@ -80,7 +80,7 @@ router.get('/:id', (req, res, next) => {
 // Put update an item
 router.put('/:id', (req, res, next) => {
   const id = req.params.id;
-  const {title, content, folderId} = req.body;
+  const {title, content, folderId, tags} = req.body;
 
   if (!title) {
     const err = new Error('Missing `title` in request body');
@@ -103,13 +103,32 @@ router.put('/:id', (req, res, next) => {
     .returning('id')
     .then(([id]) => {
       noteId = id;
-      return knex.select('notes.id', 'title', 'content', 'folder_id as folderId')
+      return knex('notes_tags')
+        .where('note_id', noteId)
+        .del()
+        .then(() => {
+          const tagsInsert = tags.map(tagId => ({note_id: noteId, tag_id: tagId}));
+          return knex('notes_tags').insert(tagsInsert);
+        });
+    })
+    .then(()=> {
+      return knex.select('notes.id', 'title', 'content', 
+        'folder_id as folderId',
+        'tags.id as tagId',
+        'tags.name as tagName')
         .from('notes')
         .leftJoin('folders', 'notes.folder_id', 'folders.id')
+        .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+        .leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
         .where('notes.id', noteId);
     })
-    .then(([result]) => {
-      res.json(result);
+    .then(result => {
+      if (result[0]){
+        const hydrated = hydrateNotes(result);
+        res.json(hydrated);
+      } else {
+        next();
+      }
     })
     .catch(err => {
       next(err);

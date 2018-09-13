@@ -80,7 +80,6 @@ INSERT INTO notes_tags (note_id, tag_id) VALUES
   (1,1),
   (1,2),
   (2,3),
-  (2,1)
-  ;
+  (2,1);
 
 
