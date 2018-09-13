@@ -21,6 +21,8 @@ CREATE TABLE notes (
   folder_id int REFERENCES folders(id) ON DELETE SET NULL
 );
 
+ALTER SEQUENCE notes_id_seq RESTART WITH 100;
+
 CREATE TABLE tags (
   id SERIAL PRIMARY KEY,
   name text NOT NULL
@@ -77,6 +79,8 @@ INSERT INTO tags (id, name) VALUES
 INSERT INTO notes_tags (note_id, tag_id) VALUES
   (1,1),
   (1,2),
-  (2,3);
+  (2,3),
+  (2,1)
+  ;
 
 

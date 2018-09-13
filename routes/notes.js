@@ -1,39 +1,46 @@
 'use strict';
 
 const express = require('express');
-
-// Create an router instance (aka "mini-app")
 const router = express.Router();
-
-// TEMP: Simple In-Memory Database
-// const data = require('../db/notes');
-// const simDB = require('../db/simDB');
-// const notes = simDB.initialize(data);
-
 const knex = require('../knex');
+const hydrateNotes = require('../utils/hydrateNotes');
 
-// Get All (and search by query)
 router.get('/', (req, res, next) => {
   const { searchTerm } = req.query;
   const { folderId } = req.query;
+  const { tagId } = req.query;
 
   knex
-    .select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName')
+    .select('notes.id', 'title', 
+      'content', 
+      'folders.id as folderId', 
+      'folders.name as folderName',
+      'tags.name as tagName',
+      'tags.id as tagId'    
+    )
     .from('notes')
     .leftJoin('folders', 'notes.folder_id', 'folders.id')
+    .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+    .leftJoin('tags', 'notes_tags.tag_id', 'tags.id')
     .modify(queryBuilder => {
       if (searchTerm) {
         queryBuilder.where('title', 'like', `%${searchTerm}%`);
       }
     })
     .modify(queryBuilder => {
-      if(folderId){
+      if (folderId){
         queryBuilder.where('folder_id', folderId);
+      }
+    })
+    .modify(queryBuilder => {
+      if (tagId){
+        queryBuilder.where('tag_id', tagId);
       }
     })
     .orderBy('notes.id')
     .then(results => {
-      res.json(results);
+      const hydrated = hydrateNotes(results);
+      res.json(hydrated);
     })
     .catch(err => {
       next(err);
@@ -45,15 +52,24 @@ router.get('/:id', (req, res, next) => {
   const id = req.params.id;
   
   knex
-    .select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName')
+    .select('notes.id', 'title', 
+      'content', 
+      'folders.id as folderId', 
+      'folders.name as folderName',
+      'tags.name as tagName',
+      'tags.id as tagId'    
+    )
     .from('notes')
     .leftJoin('folders', 'notes.folder_id', 'folders.id')
+    .leftJoin('notes_tags', 'notes.id', 'notes_tags.note_id')
+    .leftJoin('tags', 'notes_tags.tag_id', 'tags.id')
     .where('notes.id', id)
     .then(results => {
       if (!results[0]){
         next();  
       } else {
-        res.json(results[0]);
+        const hydrated = hydrateNotes(results);
+        res.json(hydrated);
       } 
     })
     .catch(err => {
@@ -102,12 +118,12 @@ router.put('/:id', (req, res, next) => {
 
 // Post (insert) an item
 router.post('/', (req, res, next) => {
-  const { title, content, folderId } = req.body;
+  const { title, content, folderId, tags} = req.body;
 
   const newItem = {
     title:  title,
     content: content,
-    folder_id: folderId 
+    folder_id: folderId
   };
 
   let noteId;
@@ -123,13 +139,28 @@ router.post('/', (req, res, next) => {
     .returning('id')
     .then(([id]) => {
       noteId = id;
-      return knex.select('notes.id', 'title', 'content', 'folders.id as folderId', 'folders.name as folderName')
+      const tagsInsert = tags.map(tagId => ({note_id: noteId, tag_id: tagId}));
+      return knex.insert(tagsInsert).into('notes_tags');
+    })
+    .then( () => {
+      return knex.select('notes.id', 'title', 'content', 
+        'folders.id as folderId', 
+        'folders.name as folderName',
+        'tags.id as tagId',
+        'tags.name as tagName')
         .from('notes')
         .leftJoin('folders', 'notes.folder_id', 'folders.id')
+        .leftJoin('notes_tags', 'notes.id','notes_tags.note_id')
+        .leftJoin('tags', 'tags.id', 'notes_tags.tag_id')
         .where('notes.id', noteId);
     })
-    .then(([result]) => {
-      res.location(`http://${req.headers.host}/notes/${result.id}`).status(201).json(result);
+    .then(result => {
+      if (result){
+        const hydrated = hydrateNotes(result)[0];
+        res.location(`http://${req.headers.host}/notes/${hydrated.id}`).status(201).json(hydrated);
+      } else {
+        next();
+      }   
     })
     .catch(err => {
       next(err);
