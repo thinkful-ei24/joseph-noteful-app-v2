@@ -3,7 +3,6 @@ const router = express.Router();
 const knex = require('../knex');
 
 router.get('/', (req, res, next) => {
-
   knex
     .select('id', 'name')
     .from('folders')
@@ -20,7 +19,7 @@ router.get('/:id', (req, res, next) => {
 
   knex('folders')
     .first()
-    .where('id',id)
+    .where('id', id)
     .then(results => {
       res.json(results);
     })
@@ -44,7 +43,7 @@ router.put('/:id', (req, res, next) => {
     .update(reqObj)
     .returning('name')
     .then(([results]) => {
-      if(!results){
+      if (!results) {
         next();
       } else {
         res.json(results);
@@ -58,7 +57,7 @@ router.put('/:id', (req, res, next) => {
 router.post('/', (req, res, next) => {
   const newFolder = req.body;
 
-  if(!newFolder.name){
+  if (!newFolder.name) {
     const err = new Error('Folder must have a name');
     err.status = 400;
     next(err);
@@ -68,10 +67,13 @@ router.post('/', (req, res, next) => {
     .insert(newFolder)
     .returning('name')
     .then(([result]) => {
-      if(!result){
+      if (!result) {
         res.sendStatus(500);
       } else {
-        res.location(`http://${req.headers.host}/folders/${result.id}`).status(201).json(result);
+        res
+          .location(`http://${req.headers.host}/folders/${result.id}`)
+          .status(201)
+          .json(result);
       }
     })
     .catch(err => {
@@ -85,7 +87,7 @@ router.delete('/:id', (req, res, next) => {
   knex('folders')
     .where('id', id)
     .del()
-    .then( () => {
+    .then(() => {
       res.sendStatus(204);
     })
     .catch(err => {
